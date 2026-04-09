@@ -66,7 +66,7 @@ describe('evaluate', () => {
     const result = evaluate('1/3 + 1/6');
     expect(isError(result)).toBe(false);
     if (!isError(result)) {
-      const acceptable = result.result === '0.5' || result.result === '1/2' || result.result === '0.5';
+      const acceptable = result.result === '0.5' || result.result === '1/2';
       expect(acceptable).toBe(true);
     }
   });
@@ -103,6 +103,50 @@ describe('evaluate', () => {
     if (isError(result)) {
       expect(result.error).toBeTruthy();
       expect(result.hint).toBeTruthy();
+    }
+  });
+
+  it('boolean: "2 > 1" → type "boolean", result "true", numeric null', () => {
+    const result = evaluate('2 > 1');
+    expect(isError(result)).toBe(false);
+    if (!isError(result)) {
+      expect(result.type).toBe('boolean');
+      expect(result.result).toBe('true');
+      expect(result.numeric).toBeNull();
+    }
+  });
+
+  it('matrix literal: "[[1,2],[3,4]]" → type "matrix", numeric null', () => {
+    const result = evaluate('[[1,2],[3,4]]');
+    expect(isError(result)).toBe(false);
+    if (!isError(result)) {
+      expect(result.type).toBe('matrix');
+      expect(result.numeric).toBeNull();
+    }
+  });
+
+  it('empty expression: "" → returns ToolError with error field', () => {
+    const result = evaluate('');
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error).toBeTruthy();
+    }
+  });
+
+  it('symbolic Stop error: "1/0" in symbolic mode → returns ToolError with error field', () => {
+    const result = evaluate('1/0', 'symbolic');
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error).toBeTruthy();
+    }
+  });
+
+  it('unit: "5 kg" → type "unit", result contains "kg"', () => {
+    const result = evaluate('5 kg');
+    expect(isError(result)).toBe(false);
+    if (!isError(result)) {
+      expect(result.type).toBe('unit');
+      expect(result.result).toContain('kg');
     }
   });
 });
