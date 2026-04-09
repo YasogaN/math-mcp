@@ -1,0 +1,41 @@
+{
+  "name": "math-mcp",
+  "version": "0.1.0",
+  "description": "A comprehensive math MCP server for AI agents",
+  "main": "dist/index.js",
+  "bin": {
+    "math-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.26.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "algebrite": "^1.4.0",
+    "mathjs": "^15.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  },
+  "ignoredBuiltDependencies": [
+    "esbuild"
+  ]
+}
