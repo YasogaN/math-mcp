@@ -1,4 +1,4 @@
 declare module 'algebrite' {
-  const algebrite: { run: (expr: string) => string; [key: string]: any };
+  const algebrite: { run: (expr: string) => string };
   export default algebrite;
 }
