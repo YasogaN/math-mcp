@@ -380,62 +380,62 @@ export function statistics(
       switch (op) {
         case 'normal_pdf': {
           const std = args.std ?? 1;
-          if (!(std > 0)) return { error: 'std must be positive' };
+          if (!(std > 0)) return { error: 'std must be positive', hint: 'Provide args.std > 0' };
           value = normalPdf(args.x, args.mean ?? 0, std);
           break;
         }
         case 'normal_cdf': {
           const std = args.std ?? 1;
-          if (!(std > 0)) return { error: 'std must be positive' };
+          if (!(std > 0)) return { error: 'std must be positive', hint: 'Provide args.std > 0' };
           value = normalCdf(args.x, args.mean ?? 0, std);
           break;
         }
         case 'normal_inv': {
-          if (!(args.p > 0 && args.p < 1)) return { error: 'p must be in (0, 1)' };
+          if (!(args.p > 0 && args.p < 1)) return { error: 'p must be in (0, 1)', hint: 'Provide args.p in (0, 1)' };
           value = normalInv(args.p, args.mean ?? 0, args.std ?? 1);
           break;
         }
         case 'binomial_pmf': {
           if (!(args.p >= 0 && args.p <= 1 && args.n >= 0 && args.k >= 0 && args.k <= args.n)) {
-            return { error: 'binomial_pmf requires p in [0,1], n >= 0, 0 <= k <= n' };
+            return { error: 'binomial_pmf requires p in [0,1], n >= 0, 0 <= k <= n', hint: 'Provide args: {k, n, p}' };
           }
           value = binomialPmf(args.k, args.n, args.p);
           break;
         }
         case 'binomial_cdf': {
           if (!(args.p >= 0 && args.p <= 1 && args.n >= 0 && args.k >= 0 && args.k <= args.n)) {
-            return { error: 'binomial_cdf requires p in [0,1], n >= 0, 0 <= k <= n' };
+            return { error: 'binomial_cdf requires p in [0,1], n >= 0, 0 <= k <= n', hint: 'Provide args: {k, n, p}' };
           }
           value = binomialCdf(args.k, args.n, args.p);
           break;
         }
         case 'poisson_pmf': {
-          if (!(args.lambda > 0 && args.k >= 0)) return { error: 'poisson_pmf requires lambda > 0 and k >= 0' };
+          if (!(args.lambda > 0 && args.k >= 0)) return { error: 'poisson_pmf requires lambda > 0 and k >= 0', hint: 'Provide args: {lambda, k}' };
           value = poissonPmf(args.k, args.lambda);
           break;
         }
         case 'poisson_cdf': {
-          if (!(args.lambda > 0 && args.k >= 0)) return { error: 'poisson_cdf requires lambda > 0 and k >= 0' };
+          if (!(args.lambda > 0 && args.k >= 0)) return { error: 'poisson_cdf requires lambda > 0 and k >= 0', hint: 'Provide args: {lambda, k}' };
           value = poissonCdf(args.k, args.lambda);
           break;
         }
         case 't_pdf': {
-          if (!(args.df > 0)) return { error: 'df must be positive' };
+          if (!(args.df > 0)) return { error: 'df must be positive', hint: 'Provide args.df > 0' };
           value = tPdf(args.x, args.df);
           break;
         }
         case 't_cdf': {
-          if (!(args.df > 0)) return { error: 'df must be positive' };
+          if (!(args.df > 0)) return { error: 'df must be positive', hint: 'Provide args.df > 0' };
           value = tCdf(args.x, args.df);
           break;
         }
         case 'chi2_pdf': {
-          if (!(args.x >= 0 && args.df > 0)) return { error: 'chi2_pdf requires x >= 0 and df > 0' };
+          if (!(args.x >= 0 && args.df > 0)) return { error: 'chi2_pdf requires x >= 0 and df > 0', hint: 'Provide args: {x, df}' };
           value = chi2Pdf(args.x, args.df);
           break;
         }
         case 'chi2_cdf': {
-          if (!(args.x >= 0 && args.df > 0)) return { error: 'chi2_cdf requires x >= 0 and df > 0' };
+          if (!(args.x >= 0 && args.df > 0)) return { error: 'chi2_cdf requires x >= 0 and df > 0', hint: 'Provide args: {x, df}' };
           value = chi2Cdf(args.x, args.df);
           break;
         }
