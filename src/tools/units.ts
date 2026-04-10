@@ -21,6 +21,13 @@ export function units(expression: string): ToolResult {
   const fromStr = expression.slice(0, sepIndex).trim();
   const toUnit = expression.slice(sepIndex + separator.length).trim();
 
+  if (!fromStr.trim()) {
+    return { error: 'Invalid format', hint: "Use format: '<value> <unit> to <unit>', e.g. '5 km to miles'" };
+  }
+  if (!toUnit.trim()) {
+    return { error: 'Invalid format', hint: "Use format: '<value> <unit> to <unit>', e.g. '5 km to miles'" };
+  }
+
   try {
     const converted = math.unit(fromStr).to(toUnit);
     const numericValue = converted.toNumber(toUnit);
@@ -49,15 +56,7 @@ export function units(expression: string): ToolResult {
       };
     }
 
-    // Unknown unit error
-    if (message.includes('not found') || message.includes('Unknown unit')) {
-      return {
-        error: message,
-        hint: 'Check unit names. Examples: km, miles, kg, lb, degF, degC, Pa, atm, kWh, J, mph',
-      };
-    }
-
-    // Generic fallback
+    // Fallback for unknown units and other errors
     return {
       error: message,
       hint: 'Check unit names. Examples: km, miles, kg, lb, degF, degC, Pa, atm, kWh, J, mph',

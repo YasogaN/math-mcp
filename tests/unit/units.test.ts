@@ -95,7 +95,7 @@ describe('units', () => {
     expect(isError(result)).toBe(true);
     if (isError(result)) {
       expect(result.error).toBeTruthy();
-      expect(result.hint).toBeTruthy();
+      expect(result.hint).toContain('Check unit names');
     }
   });
 });
