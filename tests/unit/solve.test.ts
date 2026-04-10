@@ -8,8 +8,9 @@ describe('solve', () => {
     expect(isError(result)).toBe(false);
     if (!isError(result)) {
       expect(result.type).toBe('symbolic');
-      expect(result.result).toContain('2');
-      expect(result.result).toContain('-2');
+      const solutions = result.result.split(',').map((s) => s.trim());
+      expect(solutions).toContain('2');
+      expect(solutions).toContain('-2');
     }
   });
 
@@ -57,6 +58,33 @@ describe('solve', () => {
 
   it('unknown variable not in equation: returns ToolError with helpful hint', () => {
     const result = solve('x^2 - 4 = 0', 'y');
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error).toBeTruthy();
+      expect(result.hint).toBeTruthy();
+    }
+  });
+
+  it('rational solution: "2*x - 1 = 0", variable "x" → result contains "1/2", numeric ≈ 0.5', () => {
+    const result = solve('2*x - 1 = 0', 'x');
+    expect(isError(result)).toBe(false);
+    if (!isError(result)) {
+      expect(result.result).toContain('1/2');
+      expect(result.numeric).toBeCloseTo(0.5);
+    }
+  });
+
+  it('inequality input: "x^2 <= 4", variable "x" → returns ToolError', () => {
+    const result = solve('x^2 <= 4', 'x');
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error).toBeTruthy();
+      expect(result.hint).toBeTruthy();
+    }
+  });
+
+  it('multiple equals: "a = b = c", variable "a" → returns ToolError', () => {
+    const result = solve('a = b = c', 'a');
     expect(isError(result)).toBe(true);
     if (isError(result)) {
       expect(result.error).toBeTruthy();

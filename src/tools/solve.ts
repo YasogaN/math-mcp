@@ -35,11 +35,27 @@ function escapeRegExp(s: string): string {
  * @returns ToolResult with solutions or a ToolError
  */
 export function solve(equation: string, variable: string): ToolResult {
+  // Validate: no inequalities
+  if (equation.includes('<=') || equation.includes('>=')) {
+    return {
+      error: "Inequalities are not supported",
+      hint: "Use '=' for equations, e.g. 'x^2 - 4 = 0'",
+    };
+  }
+
   // Validate: must contain "="
   if (!equation.includes('=')) {
     return {
       error: "Equation must contain '='",
       hint: "Format: 'x^2 - 4 = 0'",
+    };
+  }
+
+  // Validate: must contain exactly one "="
+  if (equation.split('=').length - 1 > 1) {
+    return {
+      error: "Equation must contain exactly one '=' sign",
+      hint: "Use a single '=' for equality, e.g. 'x^2 - 4 = 0'",
     };
   }
 
@@ -86,11 +102,19 @@ export function solve(equation: string, variable: string): ToolResult {
   // Determine numeric value (first real solution)
   let numeric: number | null = null;
   for (const sol of solutions) {
-    // Skip complex solutions (containing 'i')
-    if (!sol.includes('i')) {
+    // Skip complex solutions (standalone imaginary unit 'i')
+    const hasImaginaryUnit = /(?<![a-zA-Z0-9_])i(?![a-zA-Z0-9_])/.test(sol);
+    if (!hasImaginaryUnit) {
       const n = Number(sol);
       if (!isNaN(n)) {
         numeric = n;
+        break;
+      }
+      // Try evaluating via Algebrite float() for rational/irrational solutions
+      const floated = Algebrite.run(`float(${sol})`);
+      const fn = parseFloat(floated);
+      if (!isNaN(fn)) {
+        numeric = fn;
         break;
       }
     }
