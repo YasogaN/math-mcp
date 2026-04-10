@@ -38,3 +38,42 @@ export type ToolResult = ToolSuccess | ToolError;
 export function isError(r: ToolResult): r is ToolError {
   return 'error' in r;
 }
+
+export function toLatex(value: unknown): string {
+  if (value === null || value === undefined) {
+    return '';
+  }
+
+  if (typeof value === 'number') {
+    return String(value);
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return '';
+    }
+
+    const is2D = value.length > 0 && Array.isArray(value[0]);
+
+    if (is2D) {
+      const matrix = value as unknown[][];
+      const rows = matrix.map(row => row.map(cell => {
+        const num = Number(cell);
+        return isNaN(num) ? String(cell) : num.toString();
+      }).join(' & '));
+      return `\\begin{bmatrix} ${rows.join(' \\\\ ')} \\end{bmatrix}`;
+    }
+
+    const elements = value.map(v => {
+      const num = Number(v);
+      return isNaN(num) ? String(v) : num.toString();
+    });
+    return `\\begin{bmatrix} ${elements.join('\\\\')} \\end{bmatrix}`;
+  }
+
+  return String(value);
+}

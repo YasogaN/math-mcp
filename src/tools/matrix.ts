@@ -1,4 +1,4 @@
-import { math, type ToolResult } from '../lib/math.js';
+import { math, toLatex, type ToolResult } from '../lib/math.js';
 
 const BINARY_OPS = new Set(['multiply', 'add', 'subtract', 'dot', 'cross']);
 
@@ -131,7 +131,7 @@ export function matrix(op: string, a: number[][], b?: number[][]): ToolResult {
       return {
         result: resultStr,
         numeric: isNaN(num) ? null : num,
-        latex: '',
+        latex: toLatex(result),
         type: 'numeric',
       };
     }
@@ -139,7 +139,7 @@ export function matrix(op: string, a: number[][], b?: number[][]): ToolResult {
     return {
       result: resultStr,
       numeric: null,
-      latex: '',
+      latex: toLatex(result),
       type: 'matrix',
     };
   } catch (err: unknown) {

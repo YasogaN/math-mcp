@@ -10,7 +10,7 @@ describe('units', () => {
       expect(result.result).toContain('3.1');
       expect(result.result).toContain('mile');
       expect(result.type).toBe('unit');
-      expect(result.latex).toBe('');
+      expect(result.latex).not.toBe('');
       expect(typeof result.numeric).toBe('number');
     }
   });

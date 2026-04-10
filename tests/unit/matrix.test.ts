@@ -160,4 +160,15 @@ describe('matrix', () => {
     const result = matrix('cross', [[1, 0, 0]]);
     expect(isError(result)).toBe(true);
   });
+
+  it('inverse of [[1,2],[3,4]] → latex contains bmatrix with correct values', () => {
+    const result = matrix('inverse', [[1, 2], [3, 4]]);
+    expect(isError(result)).toBe(false);
+    if (!isError(result)) {
+      expect(result.latex).toContain('\\begin{bmatrix}');
+      expect(result.latex).toContain('&');
+      expect(result.latex).toContain('\\\\');
+      expect(result.latex).toContain('\\end{bmatrix}');
+    }
+  });
 });

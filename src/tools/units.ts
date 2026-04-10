@@ -1,4 +1,4 @@
-import { math, type ToolResult } from '../lib/math.js';
+import { math, toLatex, type ToolResult } from '../lib/math.js';
 
 // Register common unit aliases not built into mathjs
 try {
@@ -41,10 +41,17 @@ export function units(expression: string): ToolResult {
     const formatted = parseFloat(numericValue.toPrecision(6)).toString();
     const resultStr = `${formatted} ${toUnit}`;
 
+    let latex = '';
+    try {
+      latex = math.parse(resultStr).toTex();
+    } catch {
+      latex = `${formatted}\\ \\text{${toUnit}}`;
+    }
+
     return {
       result: resultStr,
       numeric: numericValue,
-      latex: '',
+      latex,
       type: 'unit',
     };
   } catch (err: unknown) {

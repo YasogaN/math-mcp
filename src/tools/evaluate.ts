@@ -1,4 +1,4 @@
-import { math, Algebrite, type ToolResult, type ToolSuccess } from '../lib/math.js';
+import { math, Algebrite, toLatex, type ToolResult, type ToolSuccess } from '../lib/math.js';
 import { isLatex, latexToExpression } from '../lib/latex.js';
 
 export function evaluate(expression: string, mode: 'numeric' | 'symbolic' = 'numeric'): ToolResult {
@@ -39,12 +39,15 @@ export function evaluate(expression: string, mode: 'numeric' | 'symbolic' = 'num
       resultString = String(algebriteResult);
       type = 'symbolic';
 
-      // Try to generate latex from mathjs parse for symbolic mode too
+      // Try to generate latex from Algebrite result or fallback to mathjs parse of result
       try {
-        latex = math.parse(expression).toTex();
+        latex = math.parse(resultString).toTex();
       } catch {
-        // fallback: use the expression itself wrapped in a simple form
-        latex = expression;
+        try {
+          latex = math.parse(processedExpression).toTex();
+        } catch {
+          latex = expression;
+        }
       }
     } else {
       // numeric mode
@@ -55,6 +58,11 @@ export function evaluate(expression: string, mode: 'numeric' | 'symbolic' = 'num
       if (mathType === 'Matrix' || mathType === 'DenseMatrix' || mathType === 'SparseMatrix') {
         resultString = math.format(result);
         type = 'matrix';
+        try {
+          latex = toLatex(result.valueOf());
+        } catch {
+          latex = '';
+        }
       } else if (mathType === 'boolean') {
         resultString = String(result);
         type = 'boolean';

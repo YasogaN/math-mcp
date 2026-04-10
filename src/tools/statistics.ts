@@ -1,4 +1,4 @@
-import { math, type ToolResult } from '../lib/math.js';
+import { math, toLatex, type ToolResult } from '../lib/math.js';
 
 const DESCRIPTIVE_OPS = new Set([
   'mean', 'median', 'mode', 'std', 'variance', 'min', 'max', 'sum',
@@ -20,7 +20,7 @@ function formatResult(value: number): ToolResult {
   return {
     result,
     numeric: value,
-    latex: '',
+    latex: toLatex(value),
     type: 'numeric',
   };
 }
