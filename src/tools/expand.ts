@@ -1,10 +1,12 @@
 import { math, Algebrite, type ToolResult } from '../lib/math.js';
 
+const HINT = "Provide an expression to expand, e.g. '(x+1)^3'";
+
 export function expand(expression: string): ToolResult {
   if (!expression || expression.trim() === '') {
     return {
       error: 'Expression cannot be empty',
-      hint: "Provide a factorable expression, e.g. '(x+1)^3'",
+      hint: HINT,
     };
   }
 
@@ -14,7 +16,7 @@ export function expand(expression: string): ToolResult {
     if (typeof output === 'string' && output.includes('Stop:')) {
       return {
         error: output,
-        hint: "Provide a factorable expression, e.g. '(x+1)^3'",
+        hint: HINT,
       };
     }
 
@@ -40,7 +42,7 @@ export function expand(expression: string): ToolResult {
     const message = err instanceof Error ? err.message : String(err);
     return {
       error: message,
-      hint: "Provide a factorable expression, e.g. '(x+1)^3'",
+      hint: HINT,
     };
   }
 }

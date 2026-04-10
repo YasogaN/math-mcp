@@ -13,14 +13,14 @@ export function factor(expression: string): ToolResult {
   try {
     const output = Algebrite.run(`factor(${expression})`);
 
-    if (output.includes('Stop:')) {
+    if (typeof output === 'string' && output.includes('Stop:')) {
       return {
         error: output,
         hint: HINT,
       };
     }
 
-    const result = output.trim();
+    const result = String(output).trim();
 
     let latex = '';
     try {
