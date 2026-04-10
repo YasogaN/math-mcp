@@ -11,6 +11,22 @@ import { matrix } from './tools/matrix.js';
 import { statistics } from './tools/statistics.js';
 import { units } from './tools/units.js';
 import { isError } from './lib/math.js';
+import { parseArgs, printHelp, printVersion } from './cli.js';
+import { DEFAULT_CONFIG, SecurityConfig } from './lib/validator.js';
+
+const cliOptions = parseArgs();
+
+if (cliOptions.showHelp) {
+  printHelp();
+  process.exit(0);
+}
+
+if (cliOptions.showVersion) {
+  printVersion();
+  process.exit(0);
+}
+
+export const securityConfig: SecurityConfig = cliOptions.config;
 
 const server = new Server(
   { name: 'math-mcp', version: '0.1.0' },
