@@ -19,6 +19,8 @@ export const math = create(all, { number: 'BigNumber', precision: 64 });
  */
 export { Algebrite };
 
+export * from './validator.js';
+
 export type ToolSuccess = {
   result: string;
   numeric: number | null;
