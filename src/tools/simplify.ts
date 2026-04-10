@@ -17,18 +17,15 @@ export function simplify(expression: string): ToolResult {
   }
 
   try {
-    // Two passes with extended rule set for thorough simplification
-    const simplified = math.simplify(
-      math.simplify(expression, SIMPLIFY_RULES),
-      SIMPLIFY_RULES
-    );
+    // Single pass with extended rule set for simplification
+    const simplified = math.simplify(expression, SIMPLIFY_RULES);
 
     const resultStr = simplified.toString();
     const latex = simplified.toTex();
 
     // Determine if result is a plain number
     const numericValue = Number(resultStr);
-    const isNumeric = !isNaN(numericValue) && resultStr.trim() !== '';
+    const isNumeric = !isNaN(numericValue) && isFinite(numericValue) && resultStr.trim() !== '';
 
     return {
       result: resultStr,
