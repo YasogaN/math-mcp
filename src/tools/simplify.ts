@@ -1,4 +1,5 @@
 import { math, type ToolResult } from '../lib/math.js';
+import { isLatex, latexToExpression } from '../lib/latex.js';
 
 // Extended rules including trig identities (mathjs uses n1/n2 as wildcard variable names)
 const SIMPLIFY_RULES = [
@@ -16,9 +17,21 @@ export function simplify(expression: string): ToolResult {
     };
   }
 
+  let processedExpression = expression;
+  if (isLatex(expression)) {
+    try {
+      processedExpression = latexToExpression(expression);
+    } catch {
+      return {
+        error: 'Failed to parse LaTeX expression',
+        hint: 'Check LaTeX syntax. Try using mathjs format instead.',
+      };
+    }
+  }
+
   try {
     // Single pass with extended rule set for simplification
-    const simplified = math.simplify(expression, SIMPLIFY_RULES);
+    const simplified = math.simplify(processedExpression, SIMPLIFY_RULES);
 
     const resultStr = simplified.toString();
     const latex = simplified.toTex();

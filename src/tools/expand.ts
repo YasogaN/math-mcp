@@ -1,4 +1,5 @@
 import { math, Algebrite, type ToolResult } from '../lib/math.js';
+import { isLatex, latexToExpression } from '../lib/latex.js';
 
 const HINT = "Provide an expression to expand, e.g. '(x+1)^3'";
 
@@ -10,8 +11,20 @@ export function expand(expression: string): ToolResult {
     };
   }
 
+  let processedExpression = expression;
+  if (isLatex(expression)) {
+    try {
+      processedExpression = latexToExpression(expression);
+    } catch {
+      return {
+        error: 'Failed to parse LaTeX expression',
+        hint: 'Check LaTeX syntax. Try using mathjs format instead.',
+      };
+    }
+  }
+
   try {
-    const output = Algebrite.run(`expand(${expression})`);
+    const output = Algebrite.run(`expand(${processedExpression})`);
 
     if (typeof output === 'string' && output.includes('Stop:')) {
       return {

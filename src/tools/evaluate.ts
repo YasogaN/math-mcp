@@ -1,4 +1,5 @@
 import { math, Algebrite, type ToolResult, type ToolSuccess } from '../lib/math.js';
+import { isLatex, latexToExpression } from '../lib/latex.js';
 
 export function evaluate(expression: string, mode: 'numeric' | 'symbolic' = 'numeric'): ToolResult {
   if (!expression || expression.trim() === '') {
@@ -8,6 +9,19 @@ export function evaluate(expression: string, mode: 'numeric' | 'symbolic' = 'num
     };
   }
 
+  let processedExpression = expression;
+  const isInputLatex = isLatex(expression);
+  if (isInputLatex) {
+    try {
+      processedExpression = latexToExpression(expression);
+    } catch {
+      return {
+        error: 'Failed to parse LaTeX expression',
+        hint: 'Check LaTeX syntax. Try using mathjs format instead.',
+      };
+    }
+  }
+
   try {
     let resultString: string;
     let type: ToolSuccess['type'];
@@ -15,7 +29,7 @@ export function evaluate(expression: string, mode: 'numeric' | 'symbolic' = 'num
     let latex = '';
 
     if (mode === 'symbolic') {
-      const algebriteResult = Algebrite.run(expression);
+      const algebriteResult = Algebrite.run(processedExpression);
       if (typeof algebriteResult === 'string' && algebriteResult.startsWith('Stop:')) {
         return {
           error: algebriteResult,
@@ -34,7 +48,7 @@ export function evaluate(expression: string, mode: 'numeric' | 'symbolic' = 'num
       }
     } else {
       // numeric mode
-      const result = math.evaluate(expression);
+      const result = math.evaluate(processedExpression);
 
       const mathType = math.typeOf(result);
 
