@@ -4,7 +4,7 @@ const BINARY_OPS = new Set(['multiply', 'add', 'subtract', 'dot', 'cross']);
 
 const SUPPORTED_OPS = new Set([
   'multiply', 'add', 'subtract', 'inverse', 'transpose', 'determinant',
-  'eigenvalues', 'eigenvectors', 'rank', 'norm', 'trace', 'cross', 'dot', 'svd',
+  'eigenvalues', 'eigenvectors', 'rank', 'norm', 'trace', 'cross', 'dot',
 ]);
 
 function computeRank(a: number[][]): number {

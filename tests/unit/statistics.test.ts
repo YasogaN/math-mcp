@@ -252,4 +252,12 @@ describe('statistics', () => {
       expect(r.error).toBeTruthy();
     }
   });
+
+  it('normal_pdf missing x → ToolError with error field', () => {
+    const r = statistics('normal_pdf', undefined, { mean: 0, std: 1 });
+    expect(isError(r)).toBe(true);
+    if (isError(r)) {
+      expect(r.error).toBeTruthy();
+    }
+  });
 });

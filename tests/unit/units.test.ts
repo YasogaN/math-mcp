@@ -98,4 +98,12 @@ describe('units', () => {
       expect(result.hint).toContain('Check unit names');
     }
   });
+
+  it('undefined expression → returns ToolError with error field', () => {
+    const result = units(undefined as any);
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error).toBeTruthy();
+    }
+  });
 });

@@ -35,6 +35,13 @@ function escapeRegExp(s: string): string {
  * @returns ToolResult with solutions or a ToolError
  */
 export function solve(equation: string, variable: string): ToolResult {
+  if (!equation || equation.trim() === '') {
+    return { error: 'Equation cannot be empty', hint: "Format: 'x^2 - 4 = 0'" };
+  }
+  if (!variable || variable.trim() === '') {
+    return { error: 'Variable cannot be empty', hint: "Provide the variable to solve for, e.g. 'x'" };
+  }
+
   // Validate: no inequalities
   if (equation.includes('<=') || equation.includes('>=')) {
     return {

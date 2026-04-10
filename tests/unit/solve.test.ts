@@ -91,4 +91,20 @@ describe('solve', () => {
       expect(result.hint).toBeTruthy();
     }
   });
+
+  it('empty equation: solve("", "x") → ToolError', () => {
+    const result = solve('', 'x');
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error).toBeTruthy();
+    }
+  });
+
+  it('empty variable: solve("x^2 = 0", "") → ToolError', () => {
+    const result = solve('x^2 = 0', '');
+    expect(isError(result)).toBe(true);
+    if (isError(result)) {
+      expect(result.error).toBeTruthy();
+    }
+  });
 });

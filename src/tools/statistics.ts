@@ -379,12 +379,14 @@ export function statistics(
 
       switch (op) {
         case 'normal_pdf': {
+          if (args.x === undefined) return { error: "Missing argument 'x'", hint: "normal_pdf requires args: {x, mean, std}" };
           const std = args.std ?? 1;
           if (!(std > 0)) return { error: 'std must be positive', hint: 'Provide args.std > 0' };
           value = normalPdf(args.x, args.mean ?? 0, std);
           break;
         }
         case 'normal_cdf': {
+          if (args.x === undefined) return { error: "Missing argument 'x'", hint: "normal_cdf requires args: {x, mean, std}" };
           const std = args.std ?? 1;
           if (!(std > 0)) return { error: 'std must be positive', hint: 'Provide args.std > 0' };
           value = normalCdf(args.x, args.mean ?? 0, std);
@@ -420,11 +422,13 @@ export function statistics(
           break;
         }
         case 't_pdf': {
+          if (args.x === undefined) return { error: "Missing argument 'x'", hint: "t_pdf requires args: {x, df}" };
           if (!(args.df > 0)) return { error: 'df must be positive', hint: 'Provide args.df > 0' };
           value = tPdf(args.x, args.df);
           break;
         }
         case 't_cdf': {
+          if (args.x === undefined) return { error: "Missing argument 'x'", hint: "t_cdf requires args: {x, df}" };
           if (!(args.df > 0)) return { error: 'df must be positive', hint: 'Provide args.df > 0' };
           value = tCdf(args.x, args.df);
           break;

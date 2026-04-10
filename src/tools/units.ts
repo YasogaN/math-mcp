@@ -8,6 +8,13 @@ try {
 }
 
 export function units(expression: string): ToolResult {
+  if (!expression || expression.trim() === '') {
+    return {
+      error: 'Expression cannot be empty',
+      hint: "Use format: '<value> <unit> to <unit>', e.g. '5 km to miles'",
+    };
+  }
+
   const separator = ' to ';
   const sepIndex = expression.indexOf(separator);
 
