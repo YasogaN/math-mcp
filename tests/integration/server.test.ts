@@ -24,7 +24,7 @@ describe('MCP Server Integration', { timeout: 30000 }, () => {
   });
 
   afterAll(async () => {
-    await client.close();
+    await client?.close();
   });
 
   it('tools/list returns all 8 tools', async () => {
@@ -53,8 +53,9 @@ describe('MCP Server Integration', { timeout: 30000 }, () => {
       arguments: { equation: 'x^2 - 9 = 0', variable: 'x' },
     });
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0].text);
-    expect(parsed.result).toContain('3');
-    expect(parsed.result).toContain('-3');
+    const roots = parsed.result.split(',').map((s: string) => s.trim());
+    expect(roots).toContain('3');
+    expect(roots).toContain('-3');
   });
 
   it('simplify round-trip: x + x simplifies to 2x', async () => {
@@ -73,7 +74,10 @@ describe('MCP Server Integration', { timeout: 30000 }, () => {
       arguments: { expression: 'x^2 - 9' },
     });
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0].text);
+    expect(parsed.result).toContain('x');
     expect(parsed.result).toContain('3');
+    // The factored form should contain a subtraction (the (x-3) factor)
+    expect(parsed.result).toContain('-3');
   });
 
   it('expand round-trip: (x+3)*(x-3) expands to x^2 - 9', async () => {
@@ -82,7 +86,7 @@ describe('MCP Server Integration', { timeout: 30000 }, () => {
       arguments: { expression: '(x+3)*(x-3)' },
     });
     const parsed = JSON.parse((result.content as Array<{ type: string; text: string }>)[0].text);
-    expect(parsed.result).toContain('x');
+    expect(parsed.result).toMatch(/x\^2|x\*\*2/);
     expect(parsed.result).toContain('9');
   });
 
