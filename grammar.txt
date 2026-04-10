@@ -1,0 +1,265 @@
+# Math MCP BNF Grammar Specification
+# Reference: math://grammar
+
+# ============================================================
+# TOP-LEVEL EXPRESSIONS
+# ============================================================
+
+<expression> ::= <number> 
+               | <function> 
+               | <binary-op> 
+               | <unary-op> 
+               | <variable> 
+               | <constant> 
+               | <matrix>
+               | <unit-conversion>
+               | <parenthesized>
+
+<parenthesized> ::= '(' <expression> ')'
+
+# ============================================================
+# NUMBERS
+# ============================================================
+
+<number> ::= <integer> 
+           | <float> 
+           | <scientific> 
+           | <complex>
+
+<integer> ::= <digit>+ 
+
+<float> ::= <digit>* '.' <digit>+ 
+          | <integer> '.' <digit>*
+
+<scientific> ::= <number> ('e' | 'E') ['+' | '-'] <digit>+
+
+<complex> ::= <expression> ('+' | '-') <number> 'i'
+           | <expression> ('+' | '-') <imaginary-unit>
+           
+<imaginary-unit> ::= <number>? 'i' | 'i'
+
+<digit> ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+
+# ============================================================
+# CONSTANTS
+# ============================================================
+
+<constant> ::= 'pi' 
+            | 'e' 
+            | 'tau' 
+            | 'phi' 
+            | 'i'
+
+# ============================================================
+# VARIABLES & IDENTIFIERS
+# ============================================================
+
+<variable> ::= <identifier>
+
+<identifier> ::= <alpha> (<alpha> | <digit> | '_')*
+
+<alpha> ::= 'a'..'z' | 'A'..'Z'
+
+# ============================================================
+# OPERATORS (Binary)
+# ============================================================
+
+<binary-op> ::= <expression> <operator> <expression>
+
+<operator> ::= '+'       # Addition
+            | '-'       # Subtraction
+            | '*'       # Multiplication
+            | '/'       # Division
+            | '^'       # Exponentiation
+            | '%'       # Modulo
+
+# ============================================================
+# OPERATORS (Unary)
+# ============================================================
+
+<unary-op> ::= '-' <expression>          # Negation
+            | <function>                  # Function call (unary)
+
+# ============================================================
+# FUNCTIONS
+# ============================================================
+
+<function> ::= <function-name> '(' [<arguments>] ')'
+
+<function-name> ::= <arithmetic-func>
+                  | <trig-func>
+                  | <log-exp-func>
+                  | <stats-func>
+                  | <matrix-func>
+                  | <symbolic-func>
+
+<arguments> ::= <expression> (',' <expression>)*
+
+# Arithmetic Functions
+<arithmetic-func> ::= 'sqrt'        # Square root
+                    | 'cbrt'        # Cube root
+                    | 'abs'         # Absolute value
+                    | 'sign'        # Sign function
+                    | 'ceil'        # Ceiling
+                    | 'floor'      # Floor
+                    | 'round'       # Round to integer
+                    | 'factorial'   # Factorial n!
+                    | 'gcd'         # Greatest common divisor
+                    | 'lcm'         # Least common multiple
+                    | 'mod'         # Modulo operation
+
+# Trigonometric Functions
+<trig-func> ::= 'sin'      # Sine (radians)
+              | 'cos'      # Cosine (radians)
+              | 'tan'      # Tangent (radians)
+              | 'asin'     # Arcsine (inverse sin)
+              | 'acos'     # Arccosine (inverse cos)
+              | 'atan'     # Arctangent (inverse tan)
+              | 'atan2'    # Two-argument arctangent
+              | 'sinh'     # Hyperbolic sine
+              | 'cosh'     # Hyperbolic cosine
+              | 'tanh'     # Hyperbolic tangent
+
+# Logarithmic & Exponential Functions
+<log-exp-func> ::= 'log'       # Natural logarithm
+                 | 'log10'     # Base-10 logarithm
+                 | 'log2'      # Base-2 logarithm
+                 | 'exp'       # Exponential e^x
+                 | 'expm1'     # exp(x) - 1 (precise for small x)
+                 | 'log1p'     # log(1 + x) (precise for small x)
+
+# Statistical Functions
+<stats-func> ::= 'min'        # Minimum of arguments
+               | 'max'        # Maximum of arguments
+               | 'mean'       # Arithmetic mean
+               | 'median'     # Median value
+               | 'std'        # Standard deviation
+               | 'var'        # Variance
+               | 'sum'        # Sum of arguments
+
+# Matrix Functions
+<matrix-func> ::= 'det'        # Determinant
+                | 'inv'        # Matrix inverse
+                | 'transpose'  # Transpose
+                | 'trace'      # Matrix trace
+                | 'norm'       # Matrix norm
+                | 'rank'       # Matrix rank
+                | 'dot'        # Dot product
+                | 'cross'      # Cross product
+
+# Symbolic/Mathematical Functions
+<symbolic-func> ::= 'derivative'   # Symbolic derivative
+                  | 'simplify'     # Algebraic simplification
+                  | 'expand'       # Polynomial expansion
+                  | 'factor'       # Polynomial factorization
+
+# ============================================================
+# MATRICES
+# ============================================================
+
+<matrix> ::= '[' '[' <rows> ']' ']'
+
+<rows> ::= <row> (',' <row>)*
+
+<row> ::= '[' <elements> ']'
+
+<elements> ::= <expression> (',' <expression>)*
+
+# Alternative 2D array notation (no brackets around rows)
+<matrix-alt> ::= '[' <elements> (',' <elements>)* ']'
+
+# ============================================================
+# UNIT CONVERSIONS
+# ============================================================
+
+<unit-conversion> ::= <value> <unit> 'to' <unit>
+
+<value> ::= <number> | <variable>
+
+<unit> ::= <unit-name>
+
+<unit-name> ::= <identifier>
+
+# Common unit examples:
+# Length: km, m, cm, mm, mi, yd, ft, in, nmi
+# Mass: kg, g, mg, lb, oz, ton
+# Temperature: degC, degF, degK, K
+# Time: s, min, h, day, week, year
+# Speed: m/s, km/h, mph, knot
+# Pressure: Pa, kPa, atm, bar, psi
+# Energy: J, kJ, cal, kcal, eV, kWh
+# Power: W, kW, MW, hp
+
+# ============================================================
+# EXPRESSION PRECEDENCE (from lowest to highest)
+# ============================================================
+
+# Precedence levels:
+# 1. Addition/Subtraction (+, -)         [lowest]
+# 2. Multiplication/Division/Modulo (*, /, %)
+# 3. Exponentiation (^)
+# 4. Unary negation (-)
+# 5. Function application
+# 6. Parentheses for grouping
+
+# Note: Use parentheses to override default precedence.
+# Example: (2 + 3) * 4 != 2 + 3 * 4
+
+# ============================================================
+# EXAMPLES
+# ============================================================
+
+# Basic arithmetic
+#   2 + 3 * 4          → 14
+#   (2 + 3) * 4       → 20
+#   10 / 3            → 3.333...
+#   2 ^ 8             → 256
+#   17 % 5            → 2
+
+# Numbers
+#   42                → integer
+#   3.14159           → float
+#   6.022e23          → scientific notation
+#   3 + 4i            → complex number
+
+# Constants
+#   pi                → 3.14159...
+#   e                 → 2.71828...
+#   tau               → 6.28318...
+#   phi               → 1.61803...
+#   i                 → sqrt(-1)
+
+# Functions
+#   sqrt(16)          → 4
+#   sin(pi/2)         → 1
+#   gcd(48, 18)       → 6
+#   factorial(5)      → 120
+
+# Matrix
+#   [[1, 2], [3, 4]]  → 2x2 matrix
+#   det([[1, 2], [3, 4]]) → -2
+
+# Unit conversion
+#   5 km to miles     → 3.10686 miles
+#   100 degF to degC  → 37.7778 degC
+
+# Symbolic
+#   derivative('x^2', 'x') → 2*x
+#   simplify('x + x') → 2*x
+#   expand('(x+1)^2') → x^2 + 2*x + 1
+#   factor('x^2 - 1') → (x-1)*(x+1)
+
+# Boolean expressions
+#   2 > 1             → true
+#   3 <= 3            → true
+
+# ============================================================
+# NOTES
+# ============================================================
+
+# - All trigonometric functions use radians unless specified
+# - Matrix indices are 1-based for compatibility with mathjs
+# - Complex numbers use i as the imaginary unit
+# - BigNumber precision is 64 decimal places
+# - Expressions are validated with max length 1000 chars
+# - Max recursion depth is 100 for nested expressions
