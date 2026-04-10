@@ -210,38 +210,42 @@ function regularizedGamma(a: number, x: number): number {
   if (x < 0) return 0;
   if (x === 0) return 0;
 
-  // Use series expansion for small x, continued fraction for large x
+  const FPMIN = 1e-300;
+  const logGam = logGamma(a);
+
   if (x < a + 1) {
-    // Series expansion
+    // Series representation
+    let ap = a;
     let sum = 1 / a;
-    let term = 1 / a;
-    for (let n = 1; n <= 300; n++) {
-      term *= x / (a + n);
-      sum += term;
-      if (Math.abs(term) < Math.abs(sum) * 1e-14) break;
+    let del = sum;
+    for (let i = 0; i < 300; i++) {
+      ap += 1;
+      del *= x / ap;
+      sum += del;
+      if (Math.abs(del) < Math.abs(sum) * 1e-14) break;
     }
-    return sum * Math.exp(-x + a * Math.log(x) - logGamma(a));
+    return sum * Math.exp(-x + a * Math.log(x) - logGam);
   } else {
-    // Lentz continued fraction for upper incomplete gamma
-    let f = 1e-30;
-    let C = f;
-    let D = 0;
+    // Continued fraction via Lentz method (upper incomplete gamma, then subtract from 1)
+    let b = x + 1 - a;
+    let c = 1 / FPMIN;
+    let d = 1 / b;
+    let h = d;
     for (let i = 1; i <= 300; i++) {
-      // Modified Lentz
-      let aN = i * (a - i);
-      D = (x + 1 - a) + aN * D;
-      if (Math.abs(D) < 1e-30) D = 1e-30;
-      C = (x + 1 - a) + aN / C;
-      if (Math.abs(C) < 1e-30) C = 1e-30;
-      D = 1 / D;
-      const delta = C * D;
-      f *= delta;
-      if (Math.abs(delta - 1) < 1e-14) break;
+      const an = -i * (i - a);
+      b += 2;
+      d = an * d + b;
+      if (Math.abs(d) < FPMIN) d = FPMIN;
+      c = b + an / c;
+      if (Math.abs(c) < FPMIN) c = FPMIN;
+      d = 1 / d;
+      const del = d * c;
+      h *= del;
+      if (Math.abs(del - 1) < 1e-14) break;
     }
-    // Actually use simple series for all cases — redo with straightforward approach
-    // Fall through to a simple numeric integration as backup
-    const upper = Math.exp(-x + a * Math.log(x) - logGamma(a)) / f;
-    return 1 - upper;
+    // CF gives upper incomplete gamma / Gamma(a); subtract from 1 for lower regularized
+    const upperIncomplete = Math.exp(-x + a * Math.log(x) - logGam) * h;
+    return 1 - upperIncomplete;
   }
 }
 
@@ -345,9 +349,15 @@ export function statistics(
           value = parseFloat(math.mad(data).toString());
           break;
         case 'skewness':
+          if (data.length < 3) {
+            return { error: 'skewness requires at least 3 data points', hint: 'Provide a dataset with 3 or more values' };
+          }
           value = skewness(data);
           break;
         case 'kurtosis':
+          if (data.length < 4) {
+            return { error: 'kurtosis requires at least 4 data points', hint: 'Provide a dataset with 4 or more values' };
+          }
           value = kurtosis(data);
           break;
         default:
@@ -368,39 +378,67 @@ export function statistics(
       let value: number;
 
       switch (op) {
-        case 'normal_pdf':
-          value = normalPdf(args.x, args.mean ?? 0, args.std ?? 1);
+        case 'normal_pdf': {
+          const std = args.std ?? 1;
+          if (!(std > 0)) return { error: 'std must be positive' };
+          value = normalPdf(args.x, args.mean ?? 0, std);
           break;
-        case 'normal_cdf':
-          value = normalCdf(args.x, args.mean ?? 0, args.std ?? 1);
+        }
+        case 'normal_cdf': {
+          const std = args.std ?? 1;
+          if (!(std > 0)) return { error: 'std must be positive' };
+          value = normalCdf(args.x, args.mean ?? 0, std);
           break;
-        case 'normal_inv':
+        }
+        case 'normal_inv': {
+          if (!(args.p > 0 && args.p < 1)) return { error: 'p must be in (0, 1)' };
           value = normalInv(args.p, args.mean ?? 0, args.std ?? 1);
           break;
-        case 'binomial_pmf':
+        }
+        case 'binomial_pmf': {
+          if (!(args.p >= 0 && args.p <= 1 && args.n >= 0 && args.k >= 0 && args.k <= args.n)) {
+            return { error: 'binomial_pmf requires p in [0,1], n >= 0, 0 <= k <= n' };
+          }
           value = binomialPmf(args.k, args.n, args.p);
           break;
-        case 'binomial_cdf':
+        }
+        case 'binomial_cdf': {
+          if (!(args.p >= 0 && args.p <= 1 && args.n >= 0 && args.k >= 0 && args.k <= args.n)) {
+            return { error: 'binomial_cdf requires p in [0,1], n >= 0, 0 <= k <= n' };
+          }
           value = binomialCdf(args.k, args.n, args.p);
           break;
-        case 'poisson_pmf':
+        }
+        case 'poisson_pmf': {
+          if (!(args.lambda > 0 && args.k >= 0)) return { error: 'poisson_pmf requires lambda > 0 and k >= 0' };
           value = poissonPmf(args.k, args.lambda);
           break;
-        case 'poisson_cdf':
+        }
+        case 'poisson_cdf': {
+          if (!(args.lambda > 0 && args.k >= 0)) return { error: 'poisson_cdf requires lambda > 0 and k >= 0' };
           value = poissonCdf(args.k, args.lambda);
           break;
-        case 't_pdf':
+        }
+        case 't_pdf': {
+          if (!(args.df > 0)) return { error: 'df must be positive' };
           value = tPdf(args.x, args.df);
           break;
-        case 't_cdf':
+        }
+        case 't_cdf': {
+          if (!(args.df > 0)) return { error: 'df must be positive' };
           value = tCdf(args.x, args.df);
           break;
-        case 'chi2_pdf':
+        }
+        case 'chi2_pdf': {
+          if (!(args.x >= 0 && args.df > 0)) return { error: 'chi2_pdf requires x >= 0 and df > 0' };
           value = chi2Pdf(args.x, args.df);
           break;
-        case 'chi2_cdf':
+        }
+        case 'chi2_cdf': {
+          if (!(args.x >= 0 && args.df > 0)) return { error: 'chi2_cdf requires x >= 0 and df > 0' };
           value = chi2Cdf(args.x, args.df);
           break;
+        }
         default:
           return { error: `Unknown operation: "${op}"`, hint: 'Check the op name.' };
       }

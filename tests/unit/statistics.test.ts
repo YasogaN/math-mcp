@@ -190,13 +190,19 @@ describe('statistics', () => {
     }
   });
 
-  it('chi2_cdf with x=1,df=2 → between 0 and 1', () => {
+  it('chi2_cdf with x=1,df=2 → approximately 0.3935 (within 0.001)', () => {
     const r = statistics('chi2_cdf', undefined, { x: 1, df: 2 });
     expect(isError(r)).toBe(false);
     if (!isError(r)) {
-      const v = parseFloat(r.result);
-      expect(v).toBeGreaterThan(0);
-      expect(v).toBeLessThan(1);
+      expect(parseFloat(r.result)).toBeCloseTo(0.3935, 3);
+    }
+  });
+
+  it('chi2_cdf with x=5,df=2 → approximately 0.9179 (within 0.001, exercises CF path)', () => {
+    const r = statistics('chi2_cdf', undefined, { x: 5, df: 2 });
+    expect(isError(r)).toBe(false);
+    if (!isError(r)) {
+      expect(parseFloat(r.result)).toBeCloseTo(0.9179, 3);
     }
   });
 
