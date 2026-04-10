@@ -43,8 +43,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       inputSchema: {
         type: 'object',
         properties: {
-          equation: { type: 'string' },
-          variable: { type: 'string' },
+          equation: { type: 'string', description: "Equation string containing '=', e.g. 'x^2 - 4 = 0'" },
+          variable: { type: 'string', description: "The variable to solve for, e.g. 'x'" },
         },
         required: ['equation', 'variable'],
       },
@@ -88,7 +88,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     {
       name: 'matrix',
       description:
-        "Performs matrix operations. Ops: multiply, add, subtract, inverse, transpose, determinant, eigenvalues, eigenvectors, rank, norm, trace, cross (3D vectors), dot (vectors), svd (not supported). Binary ops (multiply/add/subtract) require both 'a' and 'b'. Inputs are 2D number arrays. Examples: op='determinant', a=[[1,2],[3,4]]",
+        "Performs matrix operations. Ops: multiply, add, subtract, inverse, transpose, determinant, eigenvalues, eigenvectors, rank, norm, trace, cross (3D vectors), dot (vectors). SVD is not currently supported. Binary ops (multiply/add/subtract) require both 'a' and 'b'. Inputs are 2D number arrays. Examples: op='determinant', a=[[1,2],[3,4]]",
       inputSchema: {
         type: 'object',
         properties: {
@@ -96,7 +96,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
             type: 'string',
             enum: [
               'multiply', 'add', 'subtract', 'inverse', 'transpose', 'determinant',
-              'eigenvalues', 'eigenvectors', 'rank', 'norm', 'trace', 'cross', 'dot', 'svd',
+              'eigenvalues', 'eigenvectors', 'rank', 'norm', 'trace', 'cross', 'dot',
             ],
           },
           a: { type: 'array', items: { type: 'array', items: { type: 'number' } } },
@@ -108,7 +108,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     {
       name: 'statistics',
       description:
-        "Computes descriptive statistics and probability distributions. Descriptive ops use 'data' array: mean, median, mode, std, variance, min, max, sum, quantile (needs args.prob), mad, skewness (n≥3), kurtosis (n≥4). Distribution ops use 'args': normal_pdf/cdf/inv, binomial_pmf/cdf, poisson_pmf/cdf, t_pdf/cdf, chi2_pdf/cdf. Also: linear_regression. Args vary by op — e.g. normal_pdf needs {x, mean, std}, binomial_pmf needs {k, n, p}",
+        "Computes descriptive statistics and probability distributions. Descriptive ops use 'data' array: mean, median, mode, std, variance, min, max, sum, quantile (needs args.prob), mad, skewness (n≥3), kurtosis (n≥4). Distribution ops use 'args': normal_pdf/cdf/inv, binomial_pmf/cdf, poisson_pmf/cdf, t_pdf/cdf, chi2_pdf/cdf. Also: linear_regression (uses 'data' as y-values and auto-indexes x as [0,1,2,...,n-1]). Args vary by op — e.g. normal_pdf needs {x, mean, std}, binomial_pmf needs {k, n, p}",
       inputSchema: {
         type: 'object',
         properties: {
@@ -152,36 +152,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   switch (name) {
     case 'evaluate':
-      result = await evaluate(args.expression as string, args.mode as 'numeric' | 'symbolic' | undefined);
+      result = evaluate(args.expression as string, args.mode as 'numeric' | 'symbolic' | undefined);
       break;
     case 'solve':
-      result = await solve(args.equation as string, args.variable as string);
+      result = solve(args.equation as string, args.variable as string);
       break;
     case 'simplify':
-      result = await simplify(args.expression as string);
+      result = simplify(args.expression as string);
       break;
     case 'factor':
-      result = await factor(args.expression as string);
+      result = factor(args.expression as string);
       break;
     case 'expand':
-      result = await expand(args.expression as string);
+      result = expand(args.expression as string);
       break;
     case 'matrix':
-      result = await matrix(
+      result = matrix(
         args.op as string,
         args.a as number[][],
         args.b as number[][] | undefined
       );
       break;
     case 'statistics':
-      result = await statistics(
+      result = statistics(
         args.op as string,
         args.data as number[] | undefined,
         args.args as Record<string, number> | undefined
       );
       break;
     case 'units':
-      result = await units(args.expression as string);
+      result = units(args.expression as string);
       break;
     default:
       return {
