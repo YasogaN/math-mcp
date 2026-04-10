@@ -3,6 +3,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema, ListResourcesRequestSchema, ReadResourceRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { evaluate } from './tools/evaluate.js';
+import { withTimeout } from './lib/validator.js';
 import { solve } from './tools/solve.js';
 import { simplify } from './tools/simplify.js';
 import { factor } from './tools/factor.js';
@@ -242,44 +243,152 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   }
 });
 
+function validateString(value: unknown, name: string): string | null {
+  if (typeof value !== 'string') {
+    return `${name} must be a string`;
+  }
+  return null;
+}
+
+function validateNumberArray(value: unknown, name: string): string | null {
+  if (typeof value !== 'object' || value === null || !Array.isArray(value)) {
+    return `${name} must be an array`;
+  }
+  for (let i = 0; i < value.length; i++) {
+    if (typeof value[i] !== 'number') {
+      return `${name}[${i}] must be a number`;
+    }
+  }
+  return null;
+}
+
+function validateNumberMatrix(value: unknown, name: string): string | null {
+  if (typeof value !== 'object' || value === null || !Array.isArray(value)) {
+    return `${name} must be an array`;
+  }
+  for (let i = 0; i < value.length; i++) {
+    if (!Array.isArray(value[i])) {
+      return `${name}[${i}] must be an array`;
+    }
+    for (let j = 0; j < value[i].length; j++) {
+      if (typeof value[i][j] !== 'number') {
+        return `${name}[${i}][${j}] must be a number`;
+      }
+    }
+  }
+  return null;
+}
+
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args = {} } = request.params;
 
   let result: unknown;
 
   switch (name) {
-    case 'evaluate':
-      result = evaluate(args.expression as string, args.mode as 'numeric' | 'symbolic' | undefined);
+    case 'evaluate': {
+      const exprError = validateString(args.expression, 'expression');
+      if (exprError) {
+        result = { error: exprError, hint: 'Provide expression as a string' };
+        break;
+      }
+      if (args.mode !== undefined && args.mode !== 'numeric' && args.mode !== 'symbolic') {
+        result = { error: "mode must be 'numeric' or 'symbolic'", hint: 'Use numeric or symbolic' };
+        break;
+      }
+      try {
+        const mode = args.mode as 'numeric' | 'symbolic' | undefined;
+        result = await withTimeout(
+          new Promise((resolve) => resolve(evaluate(args.expression as string, mode))),
+          securityConfig.timeout,
+          `Evaluation timed out after ${securityConfig.timeout}ms`
+        );
+      } catch (e) {
+        const message = e instanceof Error ? e.message : String(e);
+        result = { error: message, hint: 'Expression took too long to evaluate' };
+      }
       break;
-    case 'solve':
+    }
+    case 'solve': {
+      const eqError = validateString(args.equation, 'equation');
+      if (eqError) {
+        result = { error: eqError, hint: 'Provide equation as a string' };
+        break;
+      }
+      const varError = validateString(args.variable, 'variable');
+      if (varError) {
+        result = { error: varError, hint: 'Provide variable as a string' };
+        break;
+      }
       result = solve(args.equation as string, args.variable as string);
       break;
-    case 'simplify':
+    }
+    case 'simplify': {
+      const exprError = validateString(args.expression, 'expression');
+      if (exprError) {
+        result = { error: exprError, hint: 'Provide expression as a string' };
+        break;
+      }
       result = simplify(args.expression as string);
       break;
-    case 'factor':
+    }
+    case 'factor': {
+      const exprError = validateString(args.expression, 'expression');
+      if (exprError) {
+        result = { error: exprError, hint: 'Provide expression as a string' };
+        break;
+      }
       result = factor(args.expression as string);
       break;
-    case 'expand':
+    }
+    case 'expand': {
+      const exprError = validateString(args.expression, 'expression');
+      if (exprError) {
+        result = { error: exprError, hint: 'Provide expression as a string' };
+        break;
+      }
       result = expand(args.expression as string);
       break;
-    case 'matrix':
+    }
+    case 'matrix': {
+      const opError = validateString(args.op, 'op');
+      if (opError) {
+        result = { error: opError, hint: 'Provide op as a string' };
+        break;
+      }
+      const aError = validateNumberMatrix(args.a, 'a');
+      if (aError) {
+        result = { error: aError, hint: 'Provide matrix a as number[][]' };
+        break;
+      }
       result = matrix(
         args.op as string,
         args.a as number[][],
         args.b as number[][] | undefined
       );
       break;
-    case 'statistics':
+    }
+    case 'statistics': {
+      const opError = validateString(args.op, 'op');
+      if (opError) {
+        result = { error: opError, hint: 'Provide op as a string' };
+        break;
+      }
       result = statistics(
         args.op as string,
         args.data as number[] | undefined,
         args.args as Record<string, number> | undefined
       );
       break;
-    case 'units':
+    }
+    case 'units': {
+      const exprError = validateString(args.expression, 'expression');
+      if (exprError) {
+        result = { error: exprError, hint: 'Provide expression as a string' };
+        break;
+      }
       result = units(args.expression as string);
       break;
+    }
     default:
       return {
         content: [

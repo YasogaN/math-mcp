@@ -1,18 +1,5 @@
 import { parse, type Node } from '@scicave/math-latex-parser';
 
-const LATEX_PATTERNS = [
-  /\\./,
-  /\^{.*?}/,
-  /_{.*?}/,
-  /\\frac\{/,
-  /\\sqrt/,
-  /\\sin|\\cos|\\tan|\\asin|\\acos|\\atan/,
-  /\\log|\\ln|\\exp/,
-  /\\pi|\\alpha|\\beta|\\gamma|\\delta|\\theta/,
-  /\\frac/,
-  /\$.*\$/,
-];
-
 export function isLatex(input: string): boolean {
   const trimmed = input.trim();
   if (trimmed.startsWith('$') && trimmed.endsWith('$')) {
@@ -20,11 +7,6 @@ export function isLatex(input: string): boolean {
   }
   if (trimmed.startsWith('\\') && trimmed.length > 1) {
     return true;
-  }
-  for (const pattern of LATEX_PATTERNS) {
-    if (pattern.test(trimmed)) {
-      return true;
-    }
   }
   return false;
 }
