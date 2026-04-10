@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListToolsRequestSchema, ListResourcesRequestSchema, ReadResourceRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { evaluate } from './tools/evaluate.js';
 import { solve } from './tools/solve.js';
 import { simplify } from './tools/simplify.js';
@@ -30,8 +30,51 @@ export const securityConfig: SecurityConfig = cliOptions.config;
 
 const server = new Server(
   { name: 'math-mcp', version: '0.1.0' },
-  { capabilities: { tools: {} } }
+  { capabilities: { tools: {}, resources: {} } }
 );
+
+const GRAMMAR = `<expression> ::= <term> { ("+" | "-") <term> }
+<term> ::= <factor> { ("*" | "/" | "^") <factor> }
+<factor> ::= <base> [ "^" <exponent> ]
+<base> ::= <number> | <constant> | <function> | <variable> | "(" <expression> ")"
+<number> ::= <integer> | <float> | <fraction>
+<integer> ::= [ "-" ] <digit> { <digit> }
+<float> ::= <integer> "." <digit> { <digit> }
+<fraction> ::= <integer> "/" <integer>
+<constant> ::= "pi" | "e" | "tau" | "phi" | "i"
+<function> ::= <trig> | <hyperbolic> | <log> | <special>
+<trig> ::= "sin" | "cos" | "tan" | "asin" | "acos" | "atan"
+<hyperbolic> ::= "sinh" | "cosh" | "tanh"
+<log> ::= "log" | "ln" | "exp"
+<special> ::= "sqrt" | "abs" | "factorial" | "derivative" | "integrate"
+<variable> ::= <letter> { <letter> | <digit> }
+<exponent> ::= <base> | "(" <expression> ")"
+<digit> ::= "0" | "1" | ... | "9"
+<letter> ::= "a" | "b" | ... | "z" | "A" | ... | "Z"`;
+
+const FUNCTIONS = {
+  arithmetic: ['add', 'subtract', 'multiply', 'divide', 'mod', 'pow', 'sqrt', 'factorial', 'abs', 'sign'],
+  trig: ['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sinh', 'cosh', 'tanh'],
+  log_exp: ['log', 'log10', 'log2', 'ln', 'exp', 'expm1'],
+  algebra: ['derivative', 'integrate', 'simplify', 'factor', 'expand', 'solve'],
+  matrix: ['det', 'inverse', 'transpose', 'eig', 'rank', 'trace'],
+  stats: ['mean', 'median', 'mode', 'std', 'variance', 'min', 'max', 'sum', 'quantile', 'skewness', 'kurtosis'],
+  distributions: ['normal_pdf', 'normal_cdf', 'normal_inv', 'binomial_pmf', 'binomial_cdf', 'poisson_pmf', 'poisson_cdf', 't_pdf', 't_cdf', 'chi2_pdf', 'chi2_cdf'],
+  units: ['unit', 'to', 'in'],
+};
+
+const CONSTANTS = [
+  { name: 'pi', value: '3.1415926535897932384626...', description: 'Ratio of circle circumference to diameter' },
+  { name: 'e', value: '2.7182818284590452353602...', description: 'Base of natural logarithm' },
+  { name: 'tau', value: '6.2831853071795862319959...', description: '2π, ratio of circle circumference to radius' },
+  { name: 'phi', value: '1.6180339887498948482045...', description: 'Golden ratio (1+√5)/2' },
+  { name: 'i', value: '0+1i', description: 'Imaginary unit (√-1)' },
+  { name: 'E', value: '2.7182818284590452353602...', description: 'Same as e (capital E)' },
+  { name: 'I', value: '0+1i', description: 'Same as i (capital I)' },
+  { name: 'undefined', value: 'undefined', description: 'Undefined value' },
+  { name: 'NaN', value: 'NaN', description: 'Not a number' },
+  { name: 'Infinity', value: '∞', description: 'Positive infinity' },
+];
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
@@ -160,6 +203,44 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
   ],
 }));
+
+server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+  resources: [
+    {
+      uri: 'math://grammar',
+      name: 'Expression Grammar',
+      description: 'BNF grammar specification for valid mathematical expressions',
+      mimeType: 'text/plain',
+    },
+    {
+      uri: 'math://functions',
+      name: 'Available Functions',
+      description: 'List of all supported mathematical functions grouped by category',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'math://constants',
+      name: 'Mathematical Constants',
+      description: 'Predefined constants (pi, e, tau, phi, i, etc.)',
+      mimeType: 'application/json',
+    },
+  ],
+}));
+
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const uri = request.params.uri;
+
+  switch (uri) {
+    case 'math://grammar':
+      return { contents: [{ uri, mimeType: 'text/plain', text: GRAMMAR }] };
+    case 'math://functions':
+      return { contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(FUNCTIONS, null, 2) }] };
+    case 'math://constants':
+      return { contents: [{ uri, mimeType: 'application/json', text: JSON.stringify(CONSTANTS, null, 2) }] };
+    default:
+      return { contents: [], isError: true };
+  }
+});
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args = {} } = request.params;
