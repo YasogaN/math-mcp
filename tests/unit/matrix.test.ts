@@ -140,4 +140,24 @@ describe('matrix', () => {
       expect(result.hint).toBeTruthy();
     }
   });
+
+  it('eigenvectors of [[2,1],[1,2]] → not a ToolError, non-empty string result, type "matrix", numeric null', () => {
+    const result = matrix('eigenvectors', [[2, 1], [1, 2]]);
+    expect(isError(result)).toBe(false);
+    if (!isError(result)) {
+      expect(result.result.length).toBeGreaterThan(0);
+      expect(result.type).toBe('matrix');
+      expect(result.numeric).toBeNull();
+    }
+  });
+
+  it('dot with missing b → ToolError', () => {
+    const result = matrix('dot', [[1, 2, 3]]);
+    expect(isError(result)).toBe(true);
+  });
+
+  it('cross with missing b → ToolError', () => {
+    const result = matrix('cross', [[1, 0, 0]]);
+    expect(isError(result)).toBe(true);
+  });
 });

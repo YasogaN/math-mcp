@@ -1,6 +1,6 @@
 import { math, type ToolResult } from '../lib/math.js';
 
-const BINARY_OPS = new Set(['multiply', 'add', 'subtract']);
+const BINARY_OPS = new Set(['multiply', 'add', 'subtract', 'dot', 'cross']);
 
 const SUPPORTED_OPS = new Set([
   'multiply', 'add', 'subtract', 'inverse', 'transpose', 'determinant',
@@ -10,12 +10,11 @@ const SUPPORTED_OPS = new Set([
 function computeRank(a: number[][]): number {
   try {
     const lup = math.lup(a);
-    // lup.U is already a plain array when input is a plain array
-    const U = (Array.isArray(lup.U) ? lup.U : lup.U.toArray()) as number[][];
-    const n = Math.min(U.length, U[0]?.length ?? 0);
+    const U = (Array.isArray(lup.U) ? lup.U : (lup.U as any).toArray()) as number[][];
     let rank = 0;
-    for (let i = 0; i < n; i++) {
-      if (Math.abs(Number(U[i][i])) > 1e-10) {
+    for (let i = 0; i < U.length; i++) {
+      const row = U[i] as number[];
+      if (row.some(v => Math.abs(Number(v)) > 1e-10)) {
         rank++;
       }
     }
@@ -26,7 +25,8 @@ function computeRank(a: number[][]): number {
 }
 
 function toFlat(a: number[][]): number[] {
-  return Array.isArray(a[0]) ? (a[0] as number[]) : (a as unknown as number[]);
+  if (a.length === 1) return a[0] as number[]; // row vector [[x,y,z]]
+  return a.map(row => (row as number[])[0]);   // column vector [[x],[y],[z]]
 }
 
 export function matrix(op: string, a: number[][], b?: number[][]): ToolResult {
