@@ -20,12 +20,25 @@
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["mcp", "math", "algebra", "calculus", "statistics", "linear-algebra", "symbolic", "unit-conversion", "model-context-protocol", "ai", "llm"],
+  "keywords": [
+    "mcp",
+    "math",
+    "algebra",
+    "calculus",
+    "statistics",
+    "linear-algebra",
+    "symbolic",
+    "unit-conversion",
+    "model-context-protocol",
+    "ai",
+    "llm"
+  ],
   "author": "math-mcp contributors",
   "license": "MIT",
   "packageManager": "pnpm@10.26.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "@scicave/math-latex-parser": "^3.0.3",
     "algebrite": "^1.4.0",
     "mathjs": "^15.2.0"
   },
