@@ -2,24 +2,6 @@
   "name": "@yasogan/math-mcp",
   "version": "0.1.0",
   "description": "A comprehensive math MCP server for AI agents",
-  "main": "dist/index.js",
-  "bin": {
-    "@yasogan/math-mcp": "dist/index.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsx src/index.ts",
-    "test": "vitest run --passWithNoTests",
-    "test:watch": "vitest",
-    "prepublishOnly": "pnpm build"
-  },
-  "engines": {
-    "node": ">=18"
-  },
   "keywords": [
     "mcp",
     "math",
@@ -33,9 +15,27 @@
     "ai",
     "llm"
   ],
-  "author": "Yasoga Nanayakkarawasam <yasogan6@outlook.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YasogaN/math-mcp"
+  },
   "license": "MIT",
-  "packageManager": "pnpm@10.26.0",
+  "author": "Yasoga Nanayakkarawasam <yasogan6@outlook.com>",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "math-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "prepublishOnly": "pnpm build",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@scicave/math-latex-parser": "^3.0.3",
@@ -48,10 +48,14 @@
     "typescript": "^6.0.2",
     "vitest": "^4.1.4"
   },
-  "ignoredBuiltDependencies": [
-    "esbuild"
-  ],
+  "packageManager": "pnpm@10.26.0",
+  "engines": {
+    "node": ">=18"
+  },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "ignoredBuiltDependencies": [
+    "esbuild"
+  ]
 }
