@@ -74,6 +74,7 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
           scope: "@yasogan"
 
+      # --- 2. PUBLISH TO GITHUB PACKAGES ---
       - name: Publish to GitHub Packages
         run: pnpm publish --no-git-checks
         env:
