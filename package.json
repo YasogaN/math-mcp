@@ -1,6 +1,6 @@
 {
   "name": "@yasogan/math-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A comprehensive math MCP server for AI agents",
   "keywords": [
     "mcp",
@@ -43,10 +43,10 @@
     "mathjs": "^15.2.0"
   },
   "devDependencies": {
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2",
-    "vitest": "^4.1.4"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
   },
   "packageManager": "pnpm@10.26.0",
   "engines": {
